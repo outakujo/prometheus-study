@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/tidwall/gjson"
+	"io"
 	"net/http"
 )
 
@@ -32,6 +35,19 @@ func main() {
 	})
 	en.GET("a", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "a")
+	})
+	en.POST("hook", func(c *gin.Context) {
+		all, err := io.ReadAll(c.Request.Body)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, err.Error())
+			return
+		}
+		val := gjson.GetBytes(all, "alerts.0.labels").Value()
+		startsAt := gjson.GetBytes(all, "alerts.0.startsAt").Value()
+		annotations := gjson.GetBytes(all, "alerts.0.annotations").Value()
+		fmt.Println(startsAt, val, annotations)
+		c.JSON(http.StatusOK, "ok")
 	})
 	err := en.Run(":8089")
 	if err != nil {

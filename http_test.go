@@ -11,18 +11,21 @@ import (
 func TestRate(t *testing.T) {
 	ur := "http://localhost:8089/a"
 	ur2 := "http://localhost:8089/tt"
+	var work = func(ur string) {
+		intn := rand.Intn(3)
+		fmt.Printf("%s sleep %d s\n", ur, intn)
+		time.Sleep(time.Duration(intn) * time.Second)
+		_, _ = http.Get(ur)
+	}
 	go func() {
-		for i := 0; i < 200; i++ {
-			intn := rand.Intn(3)
-			fmt.Printf("sleep %d s\n", intn)
-			time.Sleep(time.Duration(intn) * time.Second)
-			_, _ = http.Get(ur)
+		for {
+			work(ur)
 		}
 	}()
-	for i := 0; i < 200; i++ {
-		intn := rand.Intn(3)
-		fmt.Printf("sleep %d s\n", intn)
-		time.Sleep(time.Duration(intn) * time.Second)
-		_, _ = http.Get(ur2)
-	}
+	go func() {
+		for {
+			work(ur2)
+		}
+	}()
+	time.Sleep(6 * time.Minute)
 }
