@@ -30,6 +30,9 @@ func main() {
 	en.GET("tt", func(c *gin.Context) {
 		c.JSON(http.StatusOK, "hello")
 	})
+	en.GET("a", func(c *gin.Context) {
+		c.JSON(http.StatusOK, "a")
+	})
 	err := en.Run(":8089")
 	if err != nil {
 		panic(err)
